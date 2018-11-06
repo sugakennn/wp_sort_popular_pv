@@ -1,0 +1,122 @@
+<!-- -新着順 -->
+<!-- front-page.php -->
+<h3>最近の記事</h3>
+<ol>
+
+<?php
+
+$args = array(
+  'posts_per_page' => 5,
+  'orderby' => 'DESC'
+);
+
+$my_posts = get_posts($args);
+
+foreach ($my_posts as $post) :
+
+  setup_postdata($post);
+
+?>
+
+<li>
+<a href="<?php the_permalink(); ?>">
+  <?php if(has_post_thumbnail()): ?>
+    <?php the_post_thumbnail(); ?>
+  <?php endif; ?>
+  <span class="order"></span>
+  <ul class="category">
+    <?php foreach(get_the_category() as $category): ?>
+      <li><?php echo $category->cat_name; ?></li>
+    <?php endforeach; ?>
+    <p class="post-title"><?php the_title(); ?></p>
+  </ul>
+</a>
+</li>
+
+<?php
+
+endforeach;
+
+wp_reset_postdata();
+?>
+</ol>
+
+
+<!-- PV順 -->
+<!-- function.php -->
+<?php
+//ページ数カウントセット
+function setPostViews() {
+  $post_id = get_the_ID();
+  $custom_key = 'post_views_count';
+  $view_count = get_post_meta($post_id, $custom_key, ture);
+
+  if ($view_count === '') {
+    $view_count = 1;
+    delete_post_meta($post_id, $custom_key);
+    add_post_meta($post_id, $custom_key, $$view_count);
+	  $view_count = $view_count;
+  } else {
+    $view_count++;
+    update_post_meta($post_id, $custom_key, $view_count);
+  }
+
+	return $view_count;
+
+}
+?>
+
+<!-- index.php（カウントするページ） -->
+<?php
+echo setPostViews();
+?>
+
+<!-- front-page.php -->
+<!-- 出力ページ -->
+<ol>
+
+<?php
+
+$args = array(
+  'post_type' => 'post',
+  'meta_key' => 'post_views_count',
+  'orderby' => 'meta_value_num',
+  'order' => 'DESC',
+  'posts_per_page' => 5,
+);
+
+$my_posts = get_posts($args);
+
+foreach ($my_posts as $post) :
+
+  setup_postdata($post);
+
+?>
+<!-- get_post_metaでPV数を取得している -->
+<p>
+<?php echo get_post_meta(get_the_ID(), 'post_views_count', true); ?>
+</p>
+<li>
+<a href="<?php the_permalink(); ?>">
+  <?php if(has_post_thumbnail()): ?>
+    <?php the_post_thumbnail(); ?>
+  <?php endif; ?>
+  <span class="order"></span>
+  <ul class="category">
+    <?php foreach(get_the_category() as $category): ?>
+      <li><?php echo $category->cat_name; ?></li>
+    <?php endforeach; ?>
+    <p class="post-title"><?php the_title(); ?></p>
+  </ul>
+</a>
+</li>
+
+<?php
+
+endforeach;
+
+wp_reset_postdata();
+
+?>
+
+</ol>
